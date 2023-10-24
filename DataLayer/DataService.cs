@@ -1,13 +1,13 @@
 ﻿using DataLayer.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Xml.Linq;
 
 namespace DataLayer;
 
 public class DataService : IDataService
 {
-    
-    public void CreateCategory(Category category)
+        public void CreateCategory(Category category)
     {
         var db = new NorthwindContex();
         var id = db.Categories.Max(x => x.Id) + 1;
@@ -59,7 +59,11 @@ public class DataService : IDataService
 
     public IList<ProductSearchModel> GetProductByName(string search)
     {
-        throw new NotImplementedException();
+        var db = new NorthwindContex();
+        return db.Products.Include(x => x.Category)
+              .Where(x => x.Name.ToLower().Contains(search.ToLower()))
+              .Select(x => new ProductSearchModel { ProductName = x.Name, CategoryName = x.Category.Name })
+              .ToList();
     }
 
     public IList<Product> GetProducts()
