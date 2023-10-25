@@ -31,9 +31,9 @@ namespace DataLayer
         }
 
 
-        public IList<Category> GetCategories()
+        public (IList<Category> products, int count) GetCategories(int page, int pageSize)
         {
-            return _categories;
+            return (_categories, _categories.Count);
         }
 
         public Category? GetCategory(int id)
@@ -72,9 +72,9 @@ namespace DataLayer
         }
 
 
-        public IList<Product> GetProducts()
+        public (IList<Product> products, int count) GetProducts(int page, int pageSize)
         {
-            return _products;
+            return (_products.Skip(page* pageSize).Take(pageSize).ToList(), _products.Count);
         }
 
         public Product? GetProduct(int id)

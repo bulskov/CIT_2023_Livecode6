@@ -1,30 +1,37 @@
 ﻿using DataLayer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using WebServer.Models;
 
 namespace WebServer.Controllers;
 
 [Route("api/products")]
 [ApiController]
-public class ProductsController : ControllerBase
+public class ProductsController : BaseController
 {
     private readonly IDataService _dataService;
-    private readonly LinkGenerator _linkGenerator;
 
     public ProductsController(IDataService dataService, LinkGenerator linkGenerator)
+        :base(linkGenerator)
     {
         _dataService = dataService;
-        _linkGenerator = linkGenerator;
     }
 
 
-    [HttpGet]
-    public IActionResult GetProducts()
+    [HttpGet(Name = nameof(GetProducts))]
+    public IActionResult GetProducts(int page = 0, int pageSize = 10)
     {
-        var products = _dataService.GetProducts()
-                            .Select(CreateProductListModel);
-        return Ok(products);
+        (var products, var total) = _dataService.GetProducts(page, pageSize);
+
+        var items = products.Select(CreateProductListModel);
+
+        var result = Paging(items, total, page, pageSize, nameof(GetProducts));
+
+        return Ok(result);
     }
+
+    
 
     [HttpGet("{id}", Name = nameof(GetProduct))]
     public IActionResult GetProduct(int id)
@@ -69,8 +76,5 @@ public class ProductsController : ControllerBase
         return GetUrl(nameof(CategoriesController.GetCategory), new { id });
     }
 
-    private string GetUrl(string name, object values)
-    {
-        return _linkGenerator.GetUriByName(HttpContext, name, values) ?? "Not specified";
-    }
+   
 }

@@ -1,28 +1,33 @@
 ﻿using DataLayer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using WebServer.Models;
 
 namespace WebServer.Controllers;
 
 [Route("api/categories")]
 [ApiController]
-public class CategoriesController : ControllerBase
+public class CategoriesController : BaseController
 {
     private readonly IDataService _dataService;
-    private readonly LinkGenerator _linkGenerator;
 
     public CategoriesController(IDataService dataService, LinkGenerator linkGenerator)
+        :base(linkGenerator)
     {
         _dataService = dataService;
-        _linkGenerator = linkGenerator;
+
     }
 
-    [HttpGet]
-    public IActionResult GetCetagories()
+    [HttpGet(Name = nameof(GetCetagories))]
+    public IActionResult GetCetagories(int page = 0, int pageSize = 10)
     {
-        var categories = _dataService.GetCategories()
-                .Select(CreateCategoryModel);
-        return Ok(categories);
+       (var categories, var total) = _dataService.GetCategories(page, pageSize);
+
+        var items = categories.Select(CreateCategoryModel);
+
+        var result = Paging(items, total, page, pageSize, nameof(GetCetagories));
+
+        return Ok(result);
     }
     
     [HttpGet("{id}", Name = nameof(GetCategory))]
@@ -62,9 +67,4 @@ public class CategoriesController : ControllerBase
         };
     }
 
-    private string GetUrl(string name, object values)
-    {
-        return _linkGenerator.GetUriByName(HttpContext, name, values) ?? "Not specified";
-    }
-    
 }

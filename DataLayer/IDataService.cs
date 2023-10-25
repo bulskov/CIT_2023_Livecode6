@@ -5,9 +5,9 @@ namespace DataLayer
 {
     public interface IDataService
     {
-        IList<Category> GetCategories();
+        (IList<Category> products, int count) GetCategories(int page, int pageSize);
         Category? GetCategory(int id);
-        IList<Product> GetProducts();
+        (IList<Product> products, int count) GetProducts(int page, int pageSize);
         Product? GetProduct(int id);
         void CreateCategory(Category category);
         bool UpdateCategory(Category category);

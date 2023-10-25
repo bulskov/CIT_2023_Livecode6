@@ -33,10 +33,15 @@ public class DataService : IDataService
         return false;
     }
 
-    public IList<Category> GetCategories()
+    public (IList<Category> products, int count) GetCategories(int page, int pageSize)
     {
         var db = new NorthwindContex();
-        return db.Categories.ToList();
+        var categories =
+            db.Categories
+             .Skip(page * pageSize)
+            .Take(pageSize)
+            .ToList();
+        return (categories, db.Categories.Count());
     }
 
     public IList<Category> GetCategoriesByName(string name)
@@ -66,10 +71,15 @@ public class DataService : IDataService
               .ToList();
     }
 
-    public IList<Product> GetProducts()
+    public (IList<Product> products, int count) GetProducts(int page, int pageSize)
     {
         var db = new NorthwindContex();
-        return db.Products.Include(x => x.Category).ToList();
+        var products =  db.Products
+            .Include(x => x.Category)
+            .Skip(page * pageSize)
+            .Take(pageSize)
+            .ToList();
+        return (products, db.Products.Count());
     }
 
     public bool UpdateCategory(Category category)
